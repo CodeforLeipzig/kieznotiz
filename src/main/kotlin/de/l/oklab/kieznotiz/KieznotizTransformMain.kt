@@ -121,7 +121,6 @@ private fun configureObjectMapper() {
 }
 
 fun readEvents() {
-
     val converter =
         ResourceConverter(objectMapper, Event::class.java, Actor::class.java, District::class.java, Image::class.java);
     val elemsPerPage = 50
@@ -137,9 +136,9 @@ fun readEvents() {
     println("Total events: ${events.size}")
     val eventsInGeoRange = events.filter { isInLocationBounds(it.geodata) }
     println("Events in Neustadt-Neuschönefeld and Volkmarsdorf: ${eventsInGeoRange.size}")
-    val eventsInGeoAndTimeRange = eventsInGeoRange.filter { isInTimeRange(it) }
+    val eventsInGeoAndTimeRange = eventsInGeoRange.filter { isInTimeRange(it) }.sortedWith { a, b -> eventTime(a)?.compareTo(eventTime(b)) ?: -1 }
     println("Events in Neustadt-Neuschönefeld and Volkmarsdorf after today: ${eventsInGeoAndTimeRange.size}")
-    val features = eventsInGeoAndTimeRange.map { eventToGeoJsonFeature(it) }
+    val features = eventsInGeoAndTimeRange.subList(0, if (eventsInGeoAndTimeRange.size > 4) eventsInGeoAndTimeRange.size - 1 else 3).map { eventToGeoJsonFeature(it) }
     val content = featureCollection(features)
     val root = objectMapper.readTree(content)
     val file = File("${outputPath}/kieznotiz-events.geojson")
@@ -147,6 +146,11 @@ fun readEvents() {
     objectMapper.writeValue(file, root)
     println(""""${file.absolutePath} written""")
 
+}
+
+fun eventTime(event: Event?): LocalDateTime? {
+    val occ = event?.occurrences?.filter { isTodayOrLater(it.startDate) || isTodayOrLater(it.endDate) }
+    return occ?.get(0)?.startDate
 }
 
 fun isInLocationBounds(geoData: GeoData?) =
