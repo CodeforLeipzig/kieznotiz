@@ -8,7 +8,7 @@
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fancybox@3.0.1/dist/css/jquery.fancybox.css" />
 		<style>
 			#map{ height: 100% }
-			.info { padding: 6px 8px; font: 14px/16px Arial, Helvetica, sans-serif; background: white; background: rgba(255,255,255,0.8); box-shadow: 0 0 15px rgba(0,0,0,0.2); border-radius: 5px; } .info h4 { margin: 0 0 5px; color: #777; }
+			.info { padding: 6px 8px; font: 14px/16px Arial, Helvetica, sans-serif; background: white; background: rgba(255,255,255,1.0); box-shadow: 0 0 15px rgba(0,0,0,0.2); border-radius: 5px; } .info h3 { margin: 0 0 5px; color: #777; }
 			.legend { text-align: left; line-height: 18px; color: #555; } .legend i { width: 18px; height: 18px; float: left; margin-right: 8px; opacity: 0.7; }
 		</style>
 	</head>
@@ -60,9 +60,15 @@
 			var lastCoordinates = undefined;
 
 			var map = L.map('map').setView([51.34397677037437, 12.413649559020996], 16)
-			L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-				attribution: 'Map data &#64; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors</a>'
+			 L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}{r}.{ext}', {
+				attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+				minZoom: 0,
+				maxZoom: 20,
+				ext: 'png'
 			}).addTo(map);
+			map.touchZoom.disable();
+			map.doubleClickZoom.disable();
+			map.scrollWheelZoom.disable();
 
 			var progress = document.getElementById('progress');
 			var progressBar = document.getElementById('progressbar');
@@ -174,9 +180,9 @@
 			info.update = function(id, props) {
 			    var htmlInner = '<div style="width: 300px;">';
 			    if (props) {
-			        htmlInner += '<h4>' + props.title + '</h4>';
+			        htmlInner += '<h3>' + props.title + '</h3>';
 					if (props.description) {
-						htmlInner += '<div><b>Beschreibung:</b> </div>' + props.description;
+						htmlInner += '<div><b>Beschreibung:</b> ' + props.description + '</div>';
 					}
 					if (props.address1) {
 						htmlInner += '<br /><br /><div><b>Adresse:</b> ' + props.address1;
@@ -201,8 +207,8 @@
 						htmlInner += '<br /><div><b>Öffungszeiten:</b> ' + props.openingTimes + '</div>';
 					}
 			    } else {
-					htmlInner += '<h4>Akteure</h4>';
-			        htmlInner += '<h4>Hovere &uuml;ber einen Marker</h4>';
+					htmlInner += '<h3>Akteure</h3>';
+			        htmlInner += '<h3>Hovere &uuml;ber einen Marker</h3>';
 			    }
 			    htmlInner += '</div>';
 			    this._div.innerHTML = htmlInner;
