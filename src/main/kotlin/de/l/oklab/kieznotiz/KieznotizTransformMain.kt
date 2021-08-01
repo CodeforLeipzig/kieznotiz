@@ -15,10 +15,12 @@ import java.io.File
 import java.io.FileWriter
 import java.io.IOException
 import java.net.URL
+import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.time.temporal.ChronoUnit
+import java.util.*
 
 const val outputPath = "./docs"
 
@@ -108,7 +110,7 @@ class ElementsWalker<T>(
 
 fun main() {
     configureObjectMapper()
-    readActors()
+    //readActors()
     readEvents()
     //writeGeojson()
 }
@@ -138,13 +140,13 @@ fun readEvents() {
     println("Events in Neustadt-Neuschönefeld and Volkmarsdorf: ${eventsInGeoRange.size}")
     val eventsInGeoAndTimeRange = eventsInGeoRange.filter { isInTimeRange(it) }.sortedWith { a, b -> eventTime(a)?.compareTo(eventTime(b)) ?: -1 }
     println("Events in Neustadt-Neuschönefeld and Volkmarsdorf after today: ${eventsInGeoAndTimeRange.size}")
-    val features = eventsInGeoAndTimeRange.subList(0, if (eventsInGeoAndTimeRange.size > 4) eventsInGeoAndTimeRange.size - 1 else 3).map { eventToGeoJsonFeature(it) }
+    val features = eventsInGeoAndTimeRange.subList(0, if (eventsInGeoAndTimeRange.size > 4) eventsInGeoAndTimeRange.size else 4).map { eventToGeoJsonFeature(it) }
     val content = featureCollection(features)
-    val root = objectMapper.readTree(content)
-    val file = File("${outputPath}/kieznotiz-events.geojson")
-    //FileWriter("D:/kieznotiz-events.geojson").use { it.write(content) }
-    objectMapper.writeValue(file, root)
-    println(""""${file.absolutePath} written""")
+    //val root = objectMapper.readTree(content)
+    //val file = File("${outputPath}/kieznotiz-events.geojson")
+    FileWriter("D:/kieznotiz-events.geojson").use { it.write(content) }
+    //objectMapper.writeValue(file, root)
+    //println(""""${file.absolutePath} written""")
 
 }
 
@@ -456,7 +458,7 @@ fun actorToGeoJsonFeature(actor: Actor): String = """{
    
 }""".trimIndent()
 
-val dateTimeFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
+val dateTimeFormatter =  SimpleDateFormat("EE., dd.MM.yyyy - HH:mm ", Locale.GERMANY)
 
 fun eventToGeoJsonFeature(event: Event): String = """{
     "type": "Feature",
