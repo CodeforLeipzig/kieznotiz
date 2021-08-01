@@ -142,11 +142,11 @@ fun readEvents() {
     println("Events in Neustadt-Neuschönefeld and Volkmarsdorf after today: ${eventsInGeoAndTimeRange.size}")
     val features = eventsInGeoAndTimeRange.subList(0, if (eventsInGeoAndTimeRange.size > 4) eventsInGeoAndTimeRange.size else 4).map { eventToGeoJsonFeature(it) }
     val content = featureCollection(features)
-    //val root = objectMapper.readTree(content)
-    //val file = File("${outputPath}/kieznotiz-events.geojson")
-    FileWriter("D:/kieznotiz-events.geojson").use { it.write(content) }
-    //objectMapper.writeValue(file, root)
-    //println(""""${file.absolutePath} written""")
+    val root = objectMapper.readTree(content)
+    val file = File("${outputPath}/kieznotiz-events.geojson")
+    //FileWriter("D:/kieznotiz-events.geojson").use { it.write(content) }
+    objectMapper.writeValue(file, root)
+    println(""""${file.absolutePath} written""")
 
 }
 
