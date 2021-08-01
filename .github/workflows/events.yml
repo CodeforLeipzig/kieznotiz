@@ -11,7 +11,7 @@ jobs:
     - uses: actions/checkout@main
     - uses: OrangeLabs-moe/gradle-actions@v5.0-openjdk-11
       with:
-        args: rewrite
+        args: run
     - name: Commit report
       run: |
           git config --global user.name 'Joerg Reichert'
