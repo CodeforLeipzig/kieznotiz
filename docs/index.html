@@ -158,6 +158,8 @@
 						newFeature.setForceZIndex(10000);
 						newFeature.setIcon(redIcon)
 						highlightFeature({target: photoLayer, layer: newFeature})
+						var coordinates = newFeature.feature.geometry.coordinates;
+						map.setView([coordinates[1], coordinates[0]], zoomLevel);
 						if (run) {
 							clearTimeout(run);
 						}
