@@ -15,12 +15,11 @@ import java.io.File
 import java.io.FileWriter
 import java.io.IOException
 import java.net.URL
-import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 import java.time.temporal.ChronoUnit
 import java.util.*
+
 
 const val outputPath = "./docs"
 
@@ -110,7 +109,7 @@ class ElementsWalker<T>(
 
 fun main() {
     configureObjectMapper()
-    //readActors()
+    readActors()
     readEvents()
     //writeGeojson()
 }
@@ -138,16 +137,18 @@ fun readEvents() {
     println("Total events: ${events.size}")
     val eventsInGeoRange = events.filter { isInLocationBounds(it.geodata) }
     println("Events in Neustadt-Neuschönefeld and Volkmarsdorf: ${eventsInGeoRange.size}")
-    val eventsInGeoAndTimeRange = eventsInGeoRange.filter { isInTimeRange(it) }.sortedWith { a, b -> eventTime(a)?.compareTo(eventTime(b)) ?: -1 }
+    val eventsInGeoAndTimeRange =
+        eventsInGeoRange.filter { isInTimeRange(it) }.sortedWith { a, b -> eventTime(a)?.compareTo(eventTime(b)) ?: -1 }
     println("Events in Neustadt-Neuschönefeld and Volkmarsdorf after today: ${eventsInGeoAndTimeRange.size}")
-    val features = eventsInGeoAndTimeRange.subList(0, if (eventsInGeoAndTimeRange.size > 4) eventsInGeoAndTimeRange.size else 4).map { eventToGeoJsonFeature(it) }
+    val features =
+        eventsInGeoAndTimeRange.subList(0, if (eventsInGeoAndTimeRange.size > 4) 4 else eventsInGeoAndTimeRange.size)
+            .map { eventToGeoJsonFeature(it) }
     val content = featureCollection(features)
     val root = objectMapper.readTree(content)
     val file = File("${outputPath}/kieznotiz-events.geojson")
     //FileWriter("D:/kieznotiz-events.geojson").use { it.write(content) }
     objectMapper.writeValue(file, root)
     println(""""${file.absolutePath} written""")
-
 }
 
 fun eventTime(event: Event?): LocalDateTime? {
@@ -458,7 +459,8 @@ fun actorToGeoJsonFeature(actor: Actor): String = """{
    
 }""".trimIndent()
 
-val dateTimeFormatter =  SimpleDateFormat("EE., dd.MM.yyyy - HH:mm ", Locale.GERMANY)
+val dateTimeFormatter = DateTimeFormatter.ofPattern("EE, dd.MM.yyyy, HH:mm").withLocale(Locale.GERMAN)
+val dateTimeFormatterOnlyTime = DateTimeFormatter.ofPattern("HH:mm").withLocale(Locale.GERMAN)
 
 fun eventToGeoJsonFeature(event: Event): String = """{
     "type": "Feature",
@@ -469,21 +471,8 @@ fun eventToGeoJsonFeature(event: Event): String = """{
         "address2": ${event.address?.addressLine2?.let { sanitize(it) }},
         "actor": ${event.actor?.title?.let { sanitize(it) }},
         "url": ${event.externalWebsite?.uri?.let { sanitize(it) }},
-        "start": ${
-    event.occurrences.filter {
-        it.startDate.isAfter(LocalDateTime.now()) || (it.endDate == null || it.endDate!!.isAfter(
-            LocalDateTime.now()
-        ))
-    }.let { if (it.isNotEmpty()) it[0].startDate else null }?.let { "\"${dateTimeFormatter.format(it)}\"" }
-},
-        "end": ${
-    event.occurrences.filter {
-        it.startDate.isAfter(LocalDateTime.now()) || (it.endDate == null || it.endDate!!.isAfter(
-            LocalDateTime.now()
-        ))
-    }.let { if (it.isNotEmpty()) it[0].endDate else null }?.let { "\"${dateTimeFormatter.format(it)}\"" }
-}
-            },
+        "timespan": ${getTimeSpan(event)}
+    },
     "geometry": {
         "type": "Point",
         "coordinates": [${event.geodata?.lon}, ${event.geodata?.lat}]
@@ -491,6 +480,28 @@ fun eventToGeoJsonFeature(event: Event): String = """{
     "id": ${event.id?.let { sanitize(it) }}    
    
 }""".trimIndent()
+
+fun getTimeSpan(event: Event): String? {
+    val occ = event.occurrences.filter {
+        it.startDate.isAfter(LocalDateTime.now()) || (it.endDate == null || it.endDate!!.isAfter(
+            LocalDateTime.now()
+        ))
+    }.let { if (it.isNotEmpty()) it[0] else null }
+    val start = occ?.startDate
+    val end = occ?.endDate
+    if (start == null) return null
+    val startStr = dateTimeFormatter.format(start)
+    if (end == null) {
+        return "\"${startStr}\""
+    }
+    if (start.dayOfYear == end.dayOfYear) {
+        val endStr = dateTimeFormatterOnlyTime.format(end)
+        return "\"${startStr} - ${endStr}\""
+    } else {
+        val endStr = dateTimeFormatter.format(end)
+        return "\"$startStr - ${endStr}\""
+    }
+}
 
 fun sanitize(str: String) =
     if (str.isBlank()) null else "\"${str.replace("\"", "\\\"").replace("\n", " ").replace("\t", " ")}\""
