@@ -1,0 +1,21 @@
+name: 'Events GeoJSON rewrite'
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron:  '0 */1 * * *'
+jobs:
+  rewrite:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@main
+    - uses: OrangeLabs-moe/gradle-actions@v5.0-openjdk-11
+      with:
+        args: rewrite
+    - name: Commit report
+      run: |
+          git config --global user.name 'Joerg Reichert'
+          git config --global user.email 'joergreichert@users.noreply.github.com'
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git commit -am "Update geojson"
+          git push

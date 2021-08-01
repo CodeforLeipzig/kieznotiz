@@ -18,7 +18,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
-const val outputPath = "D:/"
+const val outputPath = "./docs"
 
 private val minLat = 51.338207
 private val maxLat = 51.349078
@@ -106,8 +106,9 @@ class ElementsWalker<T>(
 
 fun main() {
     configureObjectMapper()
-    readEvents()
-    readActors()
+    //readEvents()
+    //readActors()
+    writeGeojson()
 }
 
 private fun configureObjectMapper() {
@@ -170,7 +171,7 @@ fun writeGeojson() {
     val actorsWalker = JsonWalker("https://leipziger-ecken.de/jsonapi/akteure", queryFragment, elemsPerPage)
     val content = featureCollection(actorsWalker.walk())
     val root = objectMapper.readTree(content)
-    val file = File("""$outputPath/kieznotiz_actors.geojson""")
+    val file = File("""$outputPath/kieznotiz.geojson""")
     //FileWriter(file).use { it.write(content) }
 
     objectMapper.writeValue(file, root)
