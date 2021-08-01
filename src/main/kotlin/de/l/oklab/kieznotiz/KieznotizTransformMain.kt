@@ -1,6 +1,5 @@
 package de.l.oklab.kieznotiz
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.DeserializationContext
@@ -12,16 +11,14 @@ import com.fasterxml.jackson.databind.node.TextNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.jasminb.jsonapi.ResourceConverter
-import com.github.jasminb.jsonapi.annotations.Meta
-import com.github.jasminb.jsonapi.annotations.Relationship
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
 import java.net.URL
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.time.temporal.ChronoUnit
-import java.util.*
 
 const val outputPath = "./docs"
 
@@ -111,8 +108,8 @@ class ElementsWalker<T>(
 
 fun main() {
     configureObjectMapper()
-    //readEvents()
     readActors()
+    readEvents()
     //writeGeojson()
 }
 
@@ -142,6 +139,14 @@ fun readEvents() {
     println("Events in Neustadt-Neuschönefeld and Volkmarsdorf: ${eventsInGeoRange.size}")
     val eventsInGeoAndTimeRange = eventsInGeoRange.filter { isInTimeRange(it) }
     println("Events in Neustadt-Neuschönefeld and Volkmarsdorf after today: ${eventsInGeoAndTimeRange.size}")
+    val features = eventsInGeoAndTimeRange.map { eventToGeoJsonFeature(it) }
+    val content = featureCollection(features)
+    val root = objectMapper.readTree(content)
+    val file = File("${outputPath}/kieznotiz-events.geojson")
+    //FileWriter("D:/kieznotiz-events.geojson").use { it.write(content) }
+    objectMapper.writeValue(file, root)
+    println(""""${file.absolutePath} written""")
+
 }
 
 fun isInLocationBounds(geoData: GeoData?) =
@@ -173,8 +178,8 @@ fun readActors() {
     val features = actorsInGeoRange.map { actorToGeoJsonFeature(it) }
     val content = featureCollection(features)
     val root = objectMapper.readTree(content)
-    val file = File("""D:/kieznotiz.geojson""")
-    //FileWriter(file).use { it.write(content) }
+    val file = File("${outputPath}/kieznotiz.geojson")
+    //FileWriter("D:/kieznotiz.geojson").use { it.write(content) }
     objectMapper.writeValue(file, root)
     println(""""${file.absolutePath} written""")
 
@@ -330,9 +335,9 @@ fun writeStatistics(actors: List<Actor>) {
 
         countValueOccurence(district, actor.district?.name)
         actor.targetGroups?.forEach { countValueOccurence(targetGroup, it.name) }
-        actor.tags?.forEach {  countValueOccurence(tag, it.name) }
-        actor.categories?.forEach {  countValueOccurence(category, it.name) }
-        actor.categories?.forEach {  countValueOccurence(categoryParent, it.parent?.name) }
+        actor.tags?.forEach { countValueOccurence(tag, it.name) }
+        actor.categories?.forEach { countValueOccurence(category, it.name) }
+        actor.categories?.forEach { countValueOccurence(categoryParent, it.parent?.name) }
         countValueOccurence(actorType, actor.type?.id)
     }
 
@@ -447,7 +452,42 @@ fun actorToGeoJsonFeature(actor: Actor): String = """{
    
 }""".trimIndent()
 
-fun sanitize(str: String) = if(str.isBlank()) null else "\"${str.replace("\"", "\\\"").replace("\n", " ").replace("\t", " ")}\""
+val dateTimeFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
+
+fun eventToGeoJsonFeature(event: Event): String = """{
+    "type": "Feature",
+    "properties": {
+        "title": ${event.title?.let { sanitize(it) }},
+        "description": ${event.description?.processed?.let { sanitize(it) }},
+        "address1": ${event.address?.addressLine1?.let { sanitize(it) }},
+        "address2": ${event.address?.addressLine2?.let { sanitize(it) }},
+        "actor": ${event.actor?.title?.let { sanitize(it) }},
+        "url": ${event.externalWebsite?.uri?.let { sanitize(it) }},
+        "start": ${
+    event.occurrences.filter {
+        it.startDate.isAfter(LocalDateTime.now()) || (it.endDate == null || it.endDate!!.isAfter(
+            LocalDateTime.now()
+        ))
+    }.let { if (it.isNotEmpty()) it[0].startDate else null }?.let { "\"${dateTimeFormatter.format(it)}\"" }
+},
+        "end": ${
+    event.occurrences.filter {
+        it.startDate.isAfter(LocalDateTime.now()) || (it.endDate == null || it.endDate!!.isAfter(
+            LocalDateTime.now()
+        ))
+    }.let { if (it.isNotEmpty()) it[0].endDate else null }?.let { "\"${dateTimeFormatter.format(it)}\"" }
+}
+            },
+    "geometry": {
+        "type": "Point",
+        "coordinates": [${event.geodata?.lon}, ${event.geodata?.lat}]
+    },
+    "id": ${event.id?.let { sanitize(it) }}    
+   
+}""".trimIndent()
+
+fun sanitize(str: String) =
+    if (str.isBlank()) null else "\"${str.replace("\"", "\\\"").replace("\n", " ").replace("\t", " ")}\""
 
 fun writeGeojson() {
     val elemsPerPage = 50
