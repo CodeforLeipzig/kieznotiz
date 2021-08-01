@@ -120,7 +120,8 @@ private fun configureObjectMapper() {
 
 fun readEvents() {
 
-    val converter = ResourceConverter(objectMapper, Event::class.java, Actor::class.java, District::class.java, Image::class.java);
+    val converter =
+        ResourceConverter(objectMapper, Event::class.java, Actor::class.java, District::class.java, Image::class.java);
     val elemsPerPage = 50
     val queryFragment = { offset: Int -> "?page%5Boffset%5D=${offset}&page%5Blimit%5D=${elemsPerPage}" }
     val eventsWalker = ElementsWalker(
@@ -180,11 +181,11 @@ fun writeGeojson() {
 
 fun featureCollection(features: List<String>): String {
     return """{
-      "type": "FeatureCollection",
-      "features": [
-         ${features.joinToString(",")}
-      ]
-    }"""
+        "type": "FeatureCollection",
+        "features": [
+            ${features.joinToString(",")}
+        ]
+        }"""
 }
 
 class CustomDateTimeDeserializer : JsonDeserializer<LocalDateTime>() {

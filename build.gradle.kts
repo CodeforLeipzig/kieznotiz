@@ -31,9 +31,16 @@ dependencies {
     implementation(kotlin("stdlib"))
 }
 
-application {
-    mainClassName = "de.l.oklab.kieznotiz.KieznotizTranformMain"
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    kotlinOptions {
+        jvmTarget = "11"
+        useIR = true
+
+        freeCompilerArgs += listOf("-Xuse-ir")
+    }
 }
 
-
+application {
+    mainClass.set("de.l.oklab.kieznotiz.KieznotizTransformMainKt")
+}
 
