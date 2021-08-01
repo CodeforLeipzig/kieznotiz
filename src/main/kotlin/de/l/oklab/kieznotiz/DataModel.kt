@@ -21,7 +21,7 @@ open class Element(
     @JsonProperty("address") var address: Address?,
     @JsonProperty("geodata") var geodata: GeoData?,
     @JsonProperty("description") var description: Description?,
-    @JsonProperty("barrier_free_location") barrierFreeLocation: Boolean?
+    @JsonProperty("barrier_free_location") var barrierFreeLocation: Boolean?
 ) : BaseModel(id) {
 
     @Relationship("district")
@@ -55,10 +55,10 @@ class Actor(
     @JsonProperty("contact_person") var contactPerson: String?,
     @JsonProperty("contact_person_function") var contactPersonFunction: String?,
     @JsonProperty("description") description: Description?,
-    @JsonProperty("contact_email") contactEmail: String?,
+    @JsonProperty("contact_email") var contactEmail: String?,
     @JsonProperty("barrier_free_location") barrierFreeLocation: Boolean?,
-    @JsonProperty("opening_times") openingTimes: String?,
-    @JsonProperty("contact_phone") contactPhone: String?,
+    @JsonProperty("opening_times") var openingTimes: String?,
+    @JsonProperty("contact_phone") var contactPhone: String?,
     @JsonProperty("external_url") var externalUrl: ExternalUrl?
 ) : Element(
     id,
@@ -186,22 +186,22 @@ class Image(
     @JsonProperty("id") id: String?,
     @JsonProperty("meta") @Meta var meta: ImageMetaData?,
     @JsonProperty("drupal_internal__fid") var drupalInternalFid: Long,
-    @JsonProperty("filename") filename: String?,
-    @JsonProperty("uri") uri: Uri?,
-    @JsonProperty("filemime") filemime: FileMime?,
-    @JsonProperty("filesize") filesize: Long?
+    @JsonProperty("filename") var filename: String?,
+    @JsonProperty("uri") var uri: Uri?,
+    @JsonProperty("filemime") var filemime: FileMime?,
+    @JsonProperty("filesize") var filesize: Long?
 ) : BaseModel(id)
 
 class ImageMetaData(
-    @JsonProperty("alt") alt: String,
-    @JsonProperty("title") title: String,
-    @JsonProperty("width") width: Int,
-    @JsonProperty("height") height: Int
+    @JsonProperty("alt") var alt: String,
+    @JsonProperty("title") var title: String,
+    @JsonProperty("width") var width: Int,
+    @JsonProperty("height") var height: Int
 )
 
 class Uri(
-    @JsonProperty("value") value: String,
-    @JsonProperty("url") url: String
+    @JsonProperty("value") var value: String,
+    @JsonProperty("url") var url: String
 )
 
 enum class FileMime(var value: String) {
