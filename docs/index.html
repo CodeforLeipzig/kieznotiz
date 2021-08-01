@@ -156,7 +156,7 @@
 						run = setTimeout(function() {
 							var index = (i === end) ? start : i+1;
 							iterate(index, newFeature);
-						}, 1000);
+						}, 30000);
 					}
 					iterate(start);
 			    }
@@ -172,27 +172,40 @@
 			};
 
 			info.update = function(id, props) {
-			    var htmlInner = '<div style="width: 300px;"><h4>Fotos</h4>';
+			    var htmlInner = '<div style="width: 300px;">';
 			    if (props) {
-			        htmlInner += '<h4>' + props.description[0] + '</h4>';
+			        htmlInner += '<h4>' + props.title + '</h4>';
+					if (props.description) {
+						htmlInner += '<div><b>Beschreibung:</b> </div>' + props.description;
+					}
+					if (props.address1) {
+						htmlInner += '<br /><br /><div><b>Adresse:</b> ' + props.address1;
+					}
+					if (props.address2) {
+						htmlInner += ' ' + props.address2 + '</div>';
+					} else {
+						htmlInner += '</div>';
+					}
+					if (props.url) {
+						htmlInner += '<br /><div><b>Link:</b> <a href="' + props.url + '">' + props.url + '</a></div>';
+					}
+					if (props.contact) {
+						htmlInner += '<br /><div><b>Kontakt:</b> ' + props.contact;
+					}
+					if (props.email) {
+						htmlInner += ' ( <a href="' + props.email + '">' + props.email + '</a> ) </div>';
+					} else {
+						htmlInner += '</div>';
+					}
+					if (props.openingTimes) {
+						htmlInner += '<br /><div><b>Öffungszeiten:</b> ' + props.openingTimes + '</div>';
+					}
 			    } else {
-			        htmlInner += '<h4>Hovere &uuml;ber einen Marker</h4>'
+					htmlInner += '<h4>Akteure</h4>';
+			        htmlInner += '<h4>Hovere &uuml;ber einen Marker</h4>';
 			    }
-			    if (props) {
-			        htmlInner += props["description"].slice(1).join(", ");
-			    }
-				htmlInner += '<br /><br /><div onClick=selectMarkerProg()>'
-			    htmlInner += '<br /><br /><div id="kieznotizPhotoContainer"/>'
 			    htmlInner += '</div>';
 			    this._div.innerHTML = htmlInner;
-			    if (id) {
-			        if ($("#kieznotizPhotoContainer > img").length == 0) {
-			            $("#kieznotizPhotoContainer").append("<a id='photo_enlarged' href='" + props["urlImage"] + "'><img src='" + props["urlImage"] + "' style='width:295px' /></a>")
-			            $("a#photo_enlarged").fancybox();
-			        }
-			    } else {
-			        $("#kieznotizPhotoContainer a:last-child").remove()
-			    }
 			};
 
 			info.addTo(map);

@@ -21,6 +21,7 @@ import java.net.URL
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import java.util.*
 
 const val outputPath = "./docs"
 
@@ -169,7 +170,15 @@ fun readActors() {
     val actorsInGeoRange = actors.filter { isInLocationBounds(it.geodata) }
     println("Actors in Neustadt-Neuschönefeld and Volkmarsdorf: ${actorsInGeoRange.size}")
 
-    writeStatistics(actors)
+    val features = actorsInGeoRange.map { actorToGeoJsonFeature(it) }
+    val content = featureCollection(features)
+    val root = objectMapper.readTree(content)
+    val file = File("""D:/kieznotiz.geojson""")
+    //FileWriter(file).use { it.write(content) }
+    objectMapper.writeValue(file, root)
+    println(""""${file.absolutePath} written""")
+
+    //writeStatistics(actors)
 }
 
 fun writeStatistics(actors: List<Actor>) {
@@ -418,19 +427,27 @@ fun <T> countValueOccurence(values: MutableMap<T?, Long>, value: T?) {
     }
 }
 
-fun formatActor(actor: Actor): String = """{
-    "title": ${actor.title?.let { "$it" } ?: null},
-    "description": ${actor.description?.processed?.let { sanitize(it) }},
-    "address1": ${actor.address?.addressLine1?.let { sanitize(it) }},
-    "address2": ${actor.address?.addressLine2?.let { sanitize(it) }},
-    "url": ${actor.externalUrl?.uri?.let { sanitize(it) }},
-    "contact": ${actor.contactPerson?.let { sanitize(it) }},
-    "email": ${actor.contactEmail?.let { sanitize(it) }},
-    "openingTimes": ${actor.openingTimes?.let { sanitize(it) }},    
+fun actorToGeoJsonFeature(actor: Actor): String = """{
+    "type": "Feature",
+    "properties": {
+        "title": ${actor.title?.let { sanitize(it) }},
+        "description": ${actor.description?.processed?.let { sanitize(it) }},
+        "address1": ${actor.address?.addressLine1?.let { sanitize(it) }},
+        "address2": ${actor.address?.addressLine2?.let { sanitize(it) }},
+        "url": ${actor.externalUrl?.uri?.let { sanitize(it) }},
+        "contact": ${actor.contactPerson?.let { sanitize(it) }},
+        "email": ${actor.contactEmail?.let { sanitize(it) }},
+        "openingTimes": ${actor.openingTimes?.let { sanitize(it) }}    
+    },
+    "geometry": {
+        "type": "Point",
+        "coordinates": [${actor.geodata?.lon}, ${actor.geodata?.lat}]
+    },
+    "id": ${actor.id?.let { sanitize(it) }}    
    
 }""".trimIndent()
 
-fun sanitize(str: String) = "${str.replace("\"", "\\\\")}"
+fun sanitize(str: String) = if(str.isBlank()) null else "\"${str.replace("\"", "\\\"").replace("\n", " ").replace("\t", " ")}\""
 
 fun writeGeojson() {
     val elemsPerPage = 50
