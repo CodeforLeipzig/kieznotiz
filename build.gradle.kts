@@ -3,18 +3,17 @@ version = "0.1-SNAPSHOT"
 
 plugins {
     application
-    kotlin("jvm") version "1.5.20"
+    kotlin("jvm") version "1.6.10"
     idea
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_15
+    targetCompatibility = JavaVersion.VERSION_15
 }
 
 repositories {
-    jcenter()
-    maven("https://repo.maven.apache.org/maven2/")
+    mavenCentral()
 }
 
 dependencies {
@@ -33,8 +32,7 @@ dependencies {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
-        jvmTarget = "11"
-        useIR = true
+        jvmTarget = "15"
 
         freeCompilerArgs += listOf("-Xuse-ir")
     }
