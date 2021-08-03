@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.TextNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.jasminb.jsonapi.RelationshipResolver
 import com.github.jasminb.jsonapi.ResourceConverter
 import java.io.File
 import java.io.FileWriter
@@ -20,13 +21,14 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.*
 
+private const val localTesting = false
 
-const val outputPath = "./docs"
+private const val outputPath = "./docs"
 
-private val minLat = 51.338207
-private val maxLat = 51.349078
-private val minLon = 12.392771
-private val maxLon = 12.422404
+private const val minLat = 51.338207
+private const val maxLat = 51.349078
+private const val minLon = 12.392771
+private const val maxLon = 12.422404
 
 private val objectMapper = jacksonObjectMapper()
 
@@ -124,6 +126,7 @@ private fun configureObjectMapper() {
 fun readEvents() {
     val converter =
         ResourceConverter(objectMapper, Event::class.java, Actor::class.java, District::class.java, Image::class.java);
+    converter.setGlobalResolver(SimpleURLResolver())
     val elemsPerPage = 50
     val queryFragment = { offset: Int -> "?page%5Boffset%5D=${offset}&page%5Blimit%5D=${elemsPerPage}" }
     val eventsWalker = ElementsWalker(
@@ -144,11 +147,30 @@ fun readEvents() {
         eventsInGeoAndTimeRange.subList(0, if (eventsInGeoAndTimeRange.size > 4) 4 else eventsInGeoAndTimeRange.size)
             .map { eventToGeoJsonFeature(it) }
     val content = featureCollection(features)
-    val root = objectMapper.readTree(content)
-    val file = File("${outputPath}/kieznotiz-events.geojson")
-    //FileWriter("D:/kieznotiz-events.geojson").use { it.write(content) }
-    objectMapper.writeValue(file, root)
-    println(""""${file.absolutePath} written""")
+    if (localTesting) {
+        FileWriter("D:/kieznotiz-events.geojson").use { it.write(content) }
+    } else {
+        val root = objectMapper.readTree(content)
+        val file = File("${outputPath}/kieznotiz-events.geojson")
+        objectMapper.writeValue(file, root)
+        println(""""${file.absolutePath} written""")
+    }
+}
+
+class SimpleURLResolver : RelationshipResolver {
+
+    override fun resolve(relationshipURL: String?): ByteArray {
+        if (relationshipURL == null) {
+            return ByteArray(0)
+        }
+        try {
+            URL(relationshipURL).openStream().use {
+                return it.readAllBytes()
+            }
+        } catch(e: Exception) {
+            return ByteArray(0)
+        }
+    }
 }
 
 fun eventTime(event: Event?): LocalDateTime? {
@@ -167,7 +189,8 @@ fun isTodayOrLater(date: LocalDateTime?): Boolean =
 
 fun readActors() {
     objectMapper.registerModule(JavaTimeModule());
-    val converter = ResourceConverter(objectMapper, Actor::class.java, District::class.java, Image::class.java);
+    val converter = ResourceConverter(objectMapper, Actor::class.java, District::class.java, Image::class.java)
+    converter.setGlobalResolver(SimpleURLResolver())
     val elemsPerPage = 50
     val queryFragment = { offset: Int -> "?page%5Boffset%5D=${offset}&page%5Blimit%5D=${elemsPerPage}" }
     val actorsWalker = ElementsWalker(
@@ -184,13 +207,15 @@ fun readActors() {
 
     val features = actorsInGeoRange.map { actorToGeoJsonFeature(it) }
     val content = featureCollection(features)
-    val root = objectMapper.readTree(content)
-    val file = File("${outputPath}/kieznotiz.geojson")
-    //FileWriter("D:/kieznotiz.geojson").use { it.write(content) }
-    objectMapper.writeValue(file, root)
-    println(""""${file.absolutePath} written""")
-
-    //writeStatistics(actors)
+    if (localTesting) {
+        FileWriter("D:/kieznotiz.geojson").use { it.write(content) }
+        //writeStatistics(actors)
+    } else {
+        val root = objectMapper.readTree(content)
+        val file = File("${outputPath}/kieznotiz.geojson")
+        objectMapper.writeValue(file, root)
+        println(""""${file.absolutePath} written""")
+    }
 }
 
 fun writeStatistics(actors: List<Actor>) {

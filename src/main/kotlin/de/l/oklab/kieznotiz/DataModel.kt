@@ -1,6 +1,7 @@
 package de.l.oklab.kieznotiz
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.github.jasminb.jsonapi.RelType
 import com.github.jasminb.jsonapi.annotations.Id
 import com.github.jasminb.jsonapi.annotations.Meta
 import com.github.jasminb.jsonapi.annotations.Relationship
@@ -110,7 +111,7 @@ class Event(
     barrierFreeLocation
 ) {
 
-    @Relationship("akteur")
+    @Relationship(value="akteur", resolve = true, relType = RelType.RELATED)
     var actor: Actor? = null
 }
 
