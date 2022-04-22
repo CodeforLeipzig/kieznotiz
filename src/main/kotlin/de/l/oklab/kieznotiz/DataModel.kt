@@ -125,7 +125,7 @@ class Address(
     @JsonProperty("langcode") var langcode: String?/*LangCode?*/,
     @JsonProperty("country_code") var countryCode: String?/*CountryCode*/,
     @JsonProperty("administrative_area") var administrativeArea: String?,
-    @JsonProperty("locality") var locality: Locality,
+    @JsonProperty("locality") var locality: String,
     @JsonProperty("dependent_locality") var dependentLocality: String?,
     @JsonProperty("postal_code") var postalCode: String,
     @JsonProperty("sorting_code") var sortingCode: String?,
@@ -139,7 +139,6 @@ class Address(
 
 enum class LangCode { de }
 enum class CountryCode { DE }
-enum class Locality { Leipzig }
 
 class GeoData(
     @JsonProperty("value") var value: String,

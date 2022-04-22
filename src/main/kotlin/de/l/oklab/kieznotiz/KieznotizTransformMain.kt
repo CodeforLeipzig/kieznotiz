@@ -319,7 +319,7 @@ fun writeStatistics(actors: List<Actor>) {
         countValueOccurence(addressLangcode, actor.address?.langcode)
         countValueOccurence(addressCountryCode, actor.address?.countryCode)
         countValueOccurence(addressAdministrativeArea, actor.address?.administrativeArea)
-        countValueOccurence(addressLocality, actor.address?.locality?.toString())
+        countValueOccurence(addressLocality, actor.address?.locality)
         countValueOccurence(addressDependentLocality, actor.address?.dependentLocality)
         countValueOccurence(addressPostalCode, actor.address?.postalCode)
         countValueOccurence(addressSortingCode, actor.address?.sortingCode)
