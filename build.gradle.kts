@@ -3,13 +3,13 @@ version = "0.1-SNAPSHOT"
 
 plugins {
     application
-    kotlin("jvm") version "1.6.10"
+    kotlin("jvm")
     idea
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_15
-    targetCompatibility = JavaVersion.VERSION_15
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 repositories {
@@ -17,22 +17,22 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.20")
-    implementation("com.fasterxml.jackson.core:jackson-core:2.9.9")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:2.9.9")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.9.9")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.9")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.9")
-    implementation("com.github.victools:jsonschema-generator:4.18.0")
-    implementation("com.github.jasminb:jsonapi-converter:0.11")
-	testImplementation("org.junit.jupiter:junit-jupiter-api:5.3.1")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.3.1")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:_")
+    implementation("com.fasterxml.jackson.core:jackson-core:_")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:_")
+    implementation("com.fasterxml.jackson.core:jackson-databind:_")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:_")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:_")
+    implementation("com.github.victools:jsonschema-generator:_")
+    implementation("com.github.jasminb:jsonapi-converter:_")
+	testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     implementation(kotlin("stdlib"))
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
-        jvmTarget = "15"
+        jvmTarget = "17"
 
         freeCompilerArgs += listOf("-Xuse-ir")
     }

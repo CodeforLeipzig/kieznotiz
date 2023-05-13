@@ -60,7 +60,8 @@ class Actor(
     @JsonProperty("barrier_free_location") barrierFreeLocation: Boolean?,
     @JsonProperty("opening_times") var openingTimes: String?,
     @JsonProperty("contact_phone") var contactPhone: String?,
-    @JsonProperty("external_url") var externalUrl: ExternalUrl?
+    @JsonProperty("external_url") var externalUrl: ExternalUrl?,
+    @JsonProperty("published_at") var publishedAt: LocalDateTime?
 ) : Element(
     id,
     drupalInternalNid,
@@ -73,7 +74,7 @@ class Actor(
     address,
     geodata,
     description,
-    barrierFreeLocation
+    barrierFreeLocation,
 ) {
 
     @Relationship("typ")
