@@ -22,7 +22,8 @@ open class Element(
     @JsonProperty("address") var address: Address?,
     @JsonProperty("geodata") var geodata: GeoData?,
     @JsonProperty("description") var description: Description?,
-    @JsonProperty("barrier_free_location") var barrierFreeLocation: Boolean?
+    @JsonProperty("barrier_free_location") var barrierFreeLocation: Boolean?,
+    @JsonProperty("published_at") var publishedAt: LocalDateTime?
 ) : BaseModel(id) {
 
     @Relationship("district")
@@ -53,6 +54,7 @@ class Actor(
     @JsonProperty("path") path: Path?,
     @JsonProperty("address") address: Address?,
     @JsonProperty("geodata") geodata: GeoData?,
+    @JsonProperty("published_at") publishedAt: LocalDateTime?,
     @JsonProperty("contact_person") var contactPerson: String?,
     @JsonProperty("contact_person_function") var contactPersonFunction: String?,
     @JsonProperty("description") description: Description?,
@@ -61,7 +63,6 @@ class Actor(
     @JsonProperty("opening_times") var openingTimes: String?,
     @JsonProperty("contact_phone") var contactPhone: String?,
     @JsonProperty("external_url") var externalUrl: ExternalUrl?,
-    @JsonProperty("published_at") var publishedAt: LocalDateTime?
 ) : Element(
     id,
     drupalInternalNid,
@@ -75,6 +76,7 @@ class Actor(
     geodata,
     description,
     barrierFreeLocation,
+    publishedAt
 ) {
 
     @Relationship("typ")
@@ -95,8 +97,11 @@ class Event(
     @JsonProperty("geodata") geodata: GeoData,
     @JsonProperty("description") description: Description?,
     @JsonProperty("barrier_free_location") barrierFreeLocation: Boolean,
+    @JsonProperty("published_at") publishedAt: LocalDateTime?,
     @JsonProperty("occurrences") var occurrences: List<Occurrence>,
-    @JsonProperty("external_website") var externalWebsite: ExternalUrl?
+    @JsonProperty("external_website") var externalWebsite: ExternalUrl?,
+    @JsonProperty("field_is_featured") var fieldIsFeatured: Boolean,
+    @JsonProperty("field_online_event") var fieldOnlineEvent: Boolean,
 ) : Element(
     id,
     drupalInternalNid,
@@ -109,7 +114,8 @@ class Event(
     address,
     geodata,
     description,
-    barrierFreeLocation
+    barrierFreeLocation,
+    publishedAt
 ) {
 
     @Relationship(value="akteur", resolve = true, relType = RelType.RELATED)

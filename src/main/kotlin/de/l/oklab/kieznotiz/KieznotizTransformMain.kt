@@ -125,7 +125,7 @@ private fun configureObjectMapper() {
 
 fun readEvents() {
     val converter =
-        ResourceConverter(objectMapper, Event::class.java, Actor::class.java, District::class.java, Image::class.java);
+        ResourceConverter(objectMapper, Event::class.java, Actor::class.java, District::class.java, Image::class.java)
     converter.setGlobalResolver(SimpleURLResolver())
     val elemsPerPage = 50
     val queryFragment = { offset: Int -> "?page%5Boffset%5D=${offset}&page%5Blimit%5D=${elemsPerPage}" }
@@ -182,13 +182,13 @@ fun isInLocationBounds(geoData: GeoData?) =
     geoData != null && geoData.lat in minLat..maxLat && geoData.lon in minLon..maxLon
 
 fun isInTimeRange(event: Event) =
-    event.occurrences.filter { isTodayOrLater(it.startDate) || isTodayOrLater(it.endDate) }.isNotEmpty()
+    event.occurrences.any { isTodayOrLater(it.startDate) || isTodayOrLater(it.endDate) }
 
 fun isTodayOrLater(date: LocalDateTime?): Boolean =
     date == null || date.isAfter(LocalDateTime.now().truncatedTo(ChronoUnit.DAYS))
 
 fun readActors() {
-    objectMapper.registerModule(JavaTimeModule());
+    objectMapper.registerModule(JavaTimeModule())
     val converter = ResourceConverter(objectMapper, Actor::class.java, District::class.java, Image::class.java)
     converter.setGlobalResolver(SimpleURLResolver())
     val elemsPerPage = 50
@@ -484,8 +484,8 @@ fun actorToGeoJsonFeature(actor: Actor): String = """{
    
 }""".trimIndent()
 
-val dateTimeFormatter = DateTimeFormatter.ofPattern("EE, dd.MM.yyyy, HH:mm").withLocale(Locale.GERMAN)
-val dateTimeFormatterOnlyTime = DateTimeFormatter.ofPattern("HH:mm").withLocale(Locale.GERMAN)
+val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("EE, dd.MM.yyyy, HH:mm").withLocale(Locale.GERMAN)
+val dateTimeFormatterOnlyTime: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm").withLocale(Locale.GERMAN)
 
 fun eventToGeoJsonFeature(event: Event): String = """{
     "type": "Feature",
@@ -519,12 +519,12 @@ fun getTimeSpan(event: Event): String? {
     if (end == null) {
         return "\"${startStr}\""
     }
-    if (start.dayOfYear == end.dayOfYear) {
+    return if (start.dayOfYear == end.dayOfYear) {
         val endStr = dateTimeFormatterOnlyTime.format(end)
-        return "\"${startStr} - ${endStr}\""
+        "\"$startStr - $endStr\""
     } else {
         val endStr = dateTimeFormatter.format(end)
-        return "\"$startStr - ${endStr}\""
+        "\"$startStr - $endStr\""
     }
 }
 
